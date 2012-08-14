@@ -1,0 +1,70 @@
+---
+layout: post
+title: "Eshellでrvmを使う"
+description: ""
+category: log
+tags: [eshell, rvm, mac]
+---
+
+<p>
+bash等のシェルからは、以下のようなRVMの初期化が動作しますが、
+</p><pre class="example">
+[[ -s "$HOME/.rvm/scripts/rvm" ]] &amp;&amp; . "$HOME/.rvm/scripts/rvm"
+</pre>
+
+<p>CocoaEmacsのEshellには上記の設定は反映されません。
+</p>
+<p>
+ググってStack Overflowを見たらrvm.elというスクリプトを使うことで、EshellでもRVMの環境を作ることができそうです。
+</p>
+<p>
+<a href="http://stackoverflow.com/questions/5521112/using-rvm-in-eshell-of-emacs">ruby - Using RVM in eshell of Emacs - Stack Overflow</a>
+</p>
+<p>
+rvm.elは以下で配布されているので、インストールしてみました。
+</p>
+<p>
+<a href="https://github.com/senny/rvm.el">senny/rvm.el</a>
+</p>
+<p>
+rvm.elのインストール先は、~/.emacs.c/plugins以下にしました、
+</p>
+
+
+
+<pre class="src src-sh">$ cd ~/.emacs.d/plugins/
+$ git clone https://github.com/senny/rvm.el.git
+Cloning into <span style="color: #8b2252;">'rvm.el'</span>...
+remote: Counting objects: 328, done.        
+remote: Compressing objects: 100% (243/243), done.        
+remote: Total 328 (delta 136), reused 233 (delta 82)        
+Receiving objects: 100% (328/328), 77.87 KiB, done.
+Resolving deltas: 100% (136/136), done.
+</pre>
+
+
+<p>
+初期化を~/.emacs.d/init.el等に、
+</p>
+
+
+
+<pre class="src src-emacs-lisp">(add-to-list 'load-path <span style="color: #8b2252;">"~/.emacs.d/plugins/rvm.el"</span>)
+(<span style="color: #7f007f;">require</span> '<span style="color: #008b8b;">rvm</span>)
+(rvm-use-default) <span style="color: #b22222;">;; </span><span style="color: #b22222;">use rvm's default ruby for the current Emacs session</span>
+</pre>
+
+
+<p>
+上記の設定で、Emacsを再起動すればEshell上で、RVM環境をセットアップすることができます。
+</p>
+<p>
+あと余談ですが、localeの設定をしておかないと、rubyの実行にうまくいかない場合がありました。init.el等に使いたいlocaleの設定を追加するとよいかもしれません。
+</p>
+
+
+
+<pre class="src src-emacs-lisp">(setenv <span style="color: #8b2252;">"LANG"</span> <span style="color: #8b2252;">"en_US.UTF-8"</span>)
+</pre>
+
+

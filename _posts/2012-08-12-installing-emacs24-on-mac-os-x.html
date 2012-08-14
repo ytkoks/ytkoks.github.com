@@ -1,0 +1,129 @@
+---
+layout: post
+title: "Homebrewを使って、Emacs24をMac OS X(Lion)にインストールする"
+date: 2012-08-12 10:07
+comments: true
+categories: 
+tags: [emacs, mac, homebrew]
+---
+
+<p>
+Homebrewを使って、Mac OS XにEmacs 24.1.1をインストールする際の手順をメモしておく。以下のように少しだけ環境を変更しているので、いくつかのパッチを当てます。
+</p>
+<ul>
+<li>Mac OS X 10.7.4(Lion)
+</li>
+<li>フォントはRictyを使う
+</li>
+<li>ATOK 2012を使う
+</li>
+<li>言語環境は"English"
+</li>
+</ul>
+
+
+<p>
+作成したFormulaは、<a href="https://gist.github.com/3321337">https://gist.github.com/3321337</a> に上げたので、このFormulaを使って、以下のコマンドを実行すればインストールが完了です。
+</p>
+<pre class="example">
+$ brew install autoconf
+$ brew install https://raw.github.com/gist/3321337/a57a7342bffbfddcee046c6be3ef247da931b282/emacs.rb --cocoa --inline
+$ defaults write org.gnu.Emacs AppleLanguages "(ja, en)"
+</pre>
+
+
+<p>
+inline patchにはATOK 2012の設定がないので、ATOK 2012に対応させるため、.emacs.d/init.elに以下の設定を追加します。
+</p>
+
+
+
+<pre class="src src-emacs-lisp">(setq default-input-method <span style="color: #8b2252;">"MacOSX"</span>)
+(mac-set-input-method-parameter <span style="color: #8b2252;">"com.justsystems.inputmethod.atok25.Japanese"</span> `title <span style="color: #8b2252;">"&#28450;"</span>)
+(mac-set-input-method-parameter <span style="color: #8b2252;">"com.justsystems.inputmethod.atok25.Japanese"</span> `cursor-type 'box)
+(mac-set-input-method-parameter <span style="color: #8b2252;">"com.justsystems.inputmethod.atok25.Japanese"</span> `cursor-color <span style="color: #8b2252;">"magenta"</span>)
+</pre>
+
+
+<p>
+以上の設定で、動作するはずです。以下追加したパッチについてメモしておきます。
+</p>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1">inline-patch</h2>
+<div class="outline-text-2" id="text-1">
+
+
+<p>
+IMEを使うため、inline-patchをインストールします。パッチはMacEmacs JP ProjectのSVNから入手します。
+</p>
+<pre class="example">
+p0 &lt;&lt; "http://svn.sourceforge.jp/svnroot/macemacsjp/inline_patch/trunk/emacs-inline.patch"
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2">和文フォントを利用した際に2倍になる問題のパッチ</h2>
+<div class="outline-text-2" id="text-2">
+
+
+<p>
+プライマリーのフォントに和文のフォントを利用した場合にフレームが2倍になる問題があり、以下のサイトでパッチが説明されています。
+</p>
+<p>
+<a href="http://d.hatena.ne.jp/yascentur/20110730/1311963061">Cocoa Emacs で和文フォントをプライマリーに設定するとフレーム幅が二倍になる問題 - キーボードをたたくとき</a>
+</p>
+<p>
+パッチは以下にあるので、このパッチをFormulaに追加します。
+</p>
+<p>
+<a href="https://gist.github.com/1114252">Correct frame width with CJK fonts in Cocoa Emacs 23.3 — Gist</a>
+</p>
+<pre class="example">
+p1 &lt;&lt; "https://raw.github.com/gist/1114252/7a2563b211d1fcc8a0ebdc94d732355328c3ac62/frame-width-with-cjk-fonts.patch"
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3">Mac OS Xのデフォルトを英語環境にしてEmacsだけ日本語にする</h2>
+<div class="outline-text-2" id="text-3">
+
+
+<p>
+ime inline patchが日本語環境で無いとうまく動かないので、Emacsだけ日本語環境にします。
+</p>
+<pre class="example">
+$ defaults write org.gnu.Emacs AppleLanguages "(ja, en)"
+</pre>
+
+
+<p>
+上の設定をinline patchに反映させるには以下のサイトを参考にして、
+</p>
+<p>
+<a href="http://blogger.tempus.org/2011_09_01_archive.html">Tempus - 昨今明日: 11/09/01 - 11/10/01"</a>
+</p>
+<p>
+以下のパッチを当てます。
+</p>
+<p>
+<a href="https://gist.github.com/1273211">patch for emacs-inline.patch(apply with p0) — Gist"</a>
+</p>
+<p>
+ただ、実際には上のパッチではうまく当たらなかったので、同じ変更内容で作り直したパッチを当てています。
+</p>
+<pre class="example">
+ p1 &lt;&lt; "https://raw.github.com/gist/3321105/a7ee0c3af11ad3caf5884e52087c1088d9c903d4/inline-preferred-patch"
+</pre>
+
+
+</div>
+</div>

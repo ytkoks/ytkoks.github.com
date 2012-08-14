@@ -1,13 +1,13 @@
 #+begin_html
 ---
 layout: page
-title: Hello World!
-tagline: Supporting tagline
+title: 
+tagline: 
 ---
 {% include JB/setup %}
 #+end_html
 
-## Posts
+* Posts
 
 #+begin_html
 <ul class="posts">

@@ -1,0 +1,71 @@
+#+BEGIN_HTML
+---
+layout: post
+title: "Homebrewを使って、Emacs24をMac OS X(Lion)にインストールする"
+date: 2012-08-12 10:07
+comments: true
+categories: log
+tags: [emacs, mac, homebrew]
+---
+#+END_HTML
+
+Homebrewを使って、Mac OS XにEmacs 24.1.1をインストールする際の手順をメモしておく。以下のように少しだけ環境を変更しているので、いくつかのパッチを当てます。
+
+- Mac OS X 10.7.4(Lion)
+- フォントはRictyを使う
+- ATOK 2012を使う
+- 言語環境は"English"
+
+作成したFormulaは、[[https://gist.github.com/3321337]] に上げたので、このFormulaを使って、以下のコマンドを実行すればインストールが完了です。
+
+: $ brew install autoconf
+: $ brew install https://raw.github.com/gist/3321337/a57a7342bffbfddcee046c6be3ef247da931b282/emacs.rb --cocoa --inline
+: $ defaults write org.gnu.Emacs AppleLanguages "(ja, en)"
+
+inline patchにはATOK 2012の設定がないので、ATOK 2012に対応させるため、.emacs.d/init.elに以下の設定を追加します。
+
+#+BEGIN_SRC emacs-lisp
+(setq default-input-method "MacOSX")
+(mac-set-input-method-parameter "com.justsystems.inputmethod.atok25.Japanese" `title "漢")
+(mac-set-input-method-parameter "com.justsystems.inputmethod.atok25.Japanese" `cursor-type 'box)
+(mac-set-input-method-parameter "com.justsystems.inputmethod.atok25.Japanese" `cursor-color "magenta")
+#+END_SRC
+
+以上の設定で、動作するはずです。以下追加したパッチについてメモしておきます。
+
+* inline-patch
+
+IMEを使うため、inline-patchをインストールします。パッチはMacEmacs JP ProjectのSVNから入手します。
+
+: p0 << "http://svn.sourceforge.jp/svnroot/macemacsjp/inline_patch/trunk/emacs-inline.patch"
+
+* 和文フォントを利用した際に2倍になる問題のパッチ
+
+プライマリーのフォントに和文のフォントを利用した場合にフレームが2倍になる問題があり、以下のサイトでパッチが説明されています。
+
+[[http://d.hatena.ne.jp/yascentur/20110730/1311963061][Cocoa Emacs で和文フォントをプライマリーに設定するとフレーム幅が二倍になる問題 - キーボードをたたくとき]]
+
+パッチは以下にあるので、このパッチをFormulaに追加します。
+
+[[https://gist.github.com/1114252][Correct frame width with CJK fonts in Cocoa Emacs 23.3 — Gist]]
+
+: p1 << "https://raw.github.com/gist/1114252/7a2563b211d1fcc8a0ebdc94d732355328c3ac62/frame-width-with-cjk-fonts.patch"
+
+* Mac OS Xのデフォルトを英語環境にしてEmacsだけ日本語にする
+
+ime inline patchが日本語環境で無いとうまく動かないので、Emacsだけ日本語環境にします。
+
+: $ defaults write org.gnu.Emacs AppleLanguages "(ja, en)"
+
+上の設定をinline patchに反映させるには以下のサイトを参考にして、
+
+[[http://blogger.tempus.org/2011_09_01_archive.html][Tempus - 昨今明日: 11/09/01 - 11/10/01"]]
+
+以下のパッチを当てます。
+
+[[https://gist.github.com/1273211][patch for emacs-inline.patch(apply with p0) — Gist"]]
+
+ただ、実際には上のパッチではうまく当たらなかったので、同じ変更内容で作り直したパッチを当てています。
+
+:  p1 << "https://raw.github.com/gist/3321105/a7ee0c3af11ad3caf5884e52087c1088d9c903d4/inline-preferred-patch"
+
