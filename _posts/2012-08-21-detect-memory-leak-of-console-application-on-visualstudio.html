@@ -1,0 +1,57 @@
+---
+layout: post
+title: "Visual Studioで作成するコンソールアプリケーションのメモリリークを検知する"
+description: ""
+category: programming
+tags: [c++, visualstudio]
+---
+{% include JB/setup %}
+
+<p>
+Visual Studio 2010からコンソールアプリケーションのプロジェクトを作成した際に、メモリリークの検出を有効にする設定を以下に示します。
+</p>
+
+
+
+<pre class="src src-C"><span style="color: #483d8b;">#include</span> <span style="color: #8b2252;">"stdafx.h"</span>
+
+<span style="color: #483d8b;">#define</span> <span style="color: #a0522d;">_CRTDBG_MAP_ALLOC</span>
+<span style="color: #483d8b;">#include</span> <span style="color: #8b2252;">&lt;crtdbg.h&gt;</span>
+<span style="color: #483d8b;">#ifdef</span> _DEBUG
+<span style="color: #483d8b;">#define</span> <span style="color: #a0522d;">new</span> ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+<span style="color: #483d8b;">#endif</span>
+
+<span style="color: #228b22;">int</span> <span style="color: #0000ff;">_tmain</span>(<span style="color: #228b22;">int</span> <span style="color: #a0522d;">argc</span>, <span style="color: #228b22;">_TCHAR</span>* <span style="color: #a0522d;">argv</span>[])
+{
+        _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
+        <span style="color: #228b22;">new</span> <span style="color: #228b22;">int</span>;  <span style="color: #b22222;">// </span><span style="color: #b22222;">&lt;- &#12371;&#12371;&#12391;&#12513;&#12514;&#12522;&#12522;&#12540;&#12463;</span>
+
+        <span style="color: #a020f0;">return</span> 0;
+}
+</pre>
+
+
+<p>
+上記のコードを実行すると、以下の内容が出力ウィンドウに出力されます。
+</p>
+
+
+
+<pre class="example">Detected memory leaks!
+Dumping objects -&gt;
+c:\projects\leaktest\leaktest\leaktest.cpp(17) : {111} normal block at 0x00796930, 4 bytes long.
+ Data: &lt;    &gt; CD CD CD CD 
+Object dump complete.
+プログラム '[1292] LeakTest.exe: ネイティブ' はコード 0 (0x0) で終了しました。
+</pre>
+
+
+<p>
+上記の内容については以下のサイトを参考にしました。
+</p>
+<ul>
+<li><a href="http://www7b.biglobe.ne.jp/~robe/pf/pf008.html">プログラマーの友 第八報：メモリリークと crtdbg.h</a>
+</li>
+</ul>
+

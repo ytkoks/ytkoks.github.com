@@ -1,0 +1,46 @@
+#+begin_html
+---
+layout: post
+title: "Visual Studioで作成するコンソールアプリケーションのメモリリークを検知する"
+description: ""
+category: programming
+tags: [c++, visualstudio]
+---
+{% include JB/setup %}
+#+end_html
+
+Visual Studio 2010からコンソールアプリケーションのプロジェクトを作成した際に、メモリリークの検出を有効にする設定を以下に示します。
+
+#+begin_src C
+#include "stdafx.h"
+
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+#ifdef _DEBUG
+#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
+
+int _tmain(int argc, _TCHAR* argv[])
+{
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
+	new int;  // <- ここでメモリリーク
+
+	return 0;
+}
+#+end_src
+
+上記のコードを実行すると、以下の内容が出力ウィンドウに出力されます。
+
+#+begin_example
+Detected memory leaks!
+Dumping objects ->
+c:\projects\leaktest\leaktest\leaktest.cpp(17) : {111} normal block at 0x00796930, 4 bytes long.
+ Data: <    > CD CD CD CD 
+Object dump complete.
+プログラム '[1292] LeakTest.exe: ネイティブ' はコード 0 (0x0) で終了しました。
+#+end_example
+
+上記の内容については以下のサイトを参考にしました。
+
+- [[http://www7b.biglobe.ne.jp/~robe/pf/pf008.html][プログラマーの友 第八報：メモリリークと crtdbg.h]]
