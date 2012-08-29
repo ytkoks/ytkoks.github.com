@@ -1,0 +1,37 @@
+---
+layout: post
+title: "Procmailで特定のTo:を転送する"
+description: ""
+category: computer
+tags: [procmail]
+---
+
+<p>
+Procmailでひとつのメールを複数の条件により振り分ける必要があったので、レシピを更新しました。
+</p>
+<p>
+特定のTo:向けに来たメールは全て、foo@foo.comに転送する。特定のFrom:が来たときに、foo@foo.comとbar@bar.comにいくりたい場合は以下のように設定する。
+</p>
+
+
+
+<pre class="example">:0 cH
+* ^From:.*FROMADDRESS
+! bar@bar.com
+
+:0
+* ^To:.*TOADDRESS
+! foo@foo.com
+</pre>
+
+
+<p>
+:0の後のフラグにcを指定することでメール本体をコピーしてから処理を実行し次のブロックにコピーがそのまま渡るようになります。
+</p>
+<p>
+参考:
+</p><ul>
+<li><a href="http://www.jaist.ac.jp/~fjt/procmail.html">PROCMAIL</a>
+</li>
+</ul>
+

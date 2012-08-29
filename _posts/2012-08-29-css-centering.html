@@ -1,0 +1,42 @@
+---
+layout: post
+title: "CSSを使ってページ全体をセンタリングする"
+description: ""
+category: programming
+tags: [css, html]
+---
+<p>
+CSSを使ってページ全体を中央寄せにする設定は、以下のようにします。
+</p>
+<p>
+HTML:
+</p>
+
+
+<pre class="src src-html">&lt;<span style="color: #0000ff;">div</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"container"</span>&gt;
+    &lt;<span style="color: #0000ff;">p</span>&gt;contents&lt;/<span style="color: #0000ff;">p</span>&gt;
+&lt;/<span style="color: #0000ff;">div</span>&gt;
+</pre>
+
+
+<p>
+CSS:
+</p>
+
+
+<pre class="src src-css"><span style="color: #0000ff;">body </span>{
+    <span style="color: #a0522d;">text-align</span>: center;
+}
+<span style="color: #0000ff;">div#container </span>{ 
+    <span style="color: #a0522d;">margin</span>: 0 auto;
+    <span style="color: #a0522d;">width</span>: 800px;
+}
+</pre>
+
+
+<p>
+参考:
+</p>
+<p>
+<a href="http://plug.heteml.jp/motulog/2008/04/css.html">CSSで中央配置するときのメモ - MotuLog</a>
+</p>

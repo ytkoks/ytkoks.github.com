@@ -1,0 +1,25 @@
+#+BEGIN_HTML
+---
+layout: post
+title: "Docuwiki on a Stickのインストール"
+description: ""
+category: computer
+tags: [wiki, dokuwiki]
+---
+#+END_HTML
+社内用のWikiサーバとして使うため、DokuWikiをセットアップしてみたので、そのまとめです。
+
+とりあえず手軽にローカルで利用するため、 [[https://www.dokuwiki.org/dokuwiki_on_a_stick][DokuWiki on a Stick]] を利用します。これはサーバにMicroApacheを利用して、ローカルで動作するためのファイル一式をまとめたパッケージです。ここから最新版のパッケージをダウンロードして任意のフォルダに展開します。
+
+ただ、このパッケージのDokuWiki本体のバージョンが古いので見た目が残念な感じなので、Gitで最新版を入手しDokuWiki on a Stickのものと入れ替えます。Gitリポジトリは [[https://www.dokuwiki.org/devel:git][devel:git]] からたどり以下のコマンドでクローンします。
+
+#+begin_src sh
+$ git clone git://github.com/splitbrain/dokuwiki.git
+#+end_src
+
+クローンしたファイル一式をDokuWiki on a Stickのdokuwikiフォルダと入れ替えます。
+
+ここからは、DokuWikiのセットアップを行います。DokuWiki on a Stickのmapache.exeを実行してWebサーバーを起動します。[[http://localhost:8800/]] からアクセスできます。
+
+この後install.phpを起動するため、[[http://localhost:8800/install.php]] にアクセスして基本的な設定を行います。設定を保存したら、DocuWikiのホームに戻り、設定したsuperuserでログインすることで、管理者としてログインできます。後の設定等はWebから行う事が出来るようになします。
+
