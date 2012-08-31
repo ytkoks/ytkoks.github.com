@@ -1,0 +1,139 @@
+---
+layout: post
+title: "Javaからシリアル(RS232C)通信をする"
+description: ""
+category: 
+tags: []
+---
+{% include JB/setup %}
+<p>
+Javaではシリアルやパラレルポートを制御するためのAPIとして、Java Communication APIが定義されています。Windowsでは、このAPIの最新の実装が提供されていないため、オープンソース実装のRXTXを利用します。
+</p>
+<ul>
+<li><a href="http://rxtx.qbang.org/wiki/index.php/Main_Page">Rxtx</a>
+</li>
+</ul>
+
+
+<p>
+通常はDownloadsからコンパイル済みのバイナリをダウンロードしますが。インストールするPCはWindows7 64bit版なので、64ビット版のバイナリを以下のサイトからダウンロードします。
+</p>
+<ul>
+<li><a href="http://www.cloudhopper.com/opensource/rxtx/">Cloudhopper : RXTX</a>
+</li>
+</ul>
+
+
+<p>
+インストールは、 <a href="http://rxtx.qbang.org/wiki/index.php/Installation_for_Windows">Installation for Windows - Rxtx</a> を参考に、展開したファイルをJREまたはJDKのフォルダにコピーします。
+</p>
+<pre class="example">
+コピー win64\rxtxSerial.dll C:\Java\jdk1.7.0_06\bin
+コピー RXTXcomm.jar C:\Java\jdk1.7.0_06\jre\lib\ext
+</pre>
+
+
+<p>
+参考
+</p><ul>
+<li><a href="http://www.javainthebox.net/JavaForFA/08-09CommAPI/No.08/commapi1.html">FA向けJavaプログラミング講座/8回/CommunicationAPI (1)</a>
+</li>
+<li><a href="http://www.02.246.ne.jp/~torutk/javahow2/javaxcomm.html">Java Communications APIの使い方</a>
+</li>
+<li><a href="http://d.hatena.ne.jp/shishimaruby/20110126/1296002224">windows 64bitでcomポートと通信する - メモス＼(^o^)／</a>
+</li>
+<li><a href="http://www.maroon.dti.ne.jp/koten-kairo/works/dsPIC/jc3.html">RXTXライブラリの使い方 - Javaでシリアル通信（３）</a>
+</li>
+</ul>
+
+
+<p>
+以下に通信をエコーするだけのサンプルを置いておきます。
+</p>
+
+
+
+<pre class="src src-java"><span style="color: #a020f0;">import</span> <span style="color: #008b8b;">java</span>.<span style="color: #008b8b;">io</span>.*;
+<span style="color: #a020f0;">import</span> <span style="color: #008b8b;">java</span>.<span style="color: #008b8b;">util</span>.*;
+<span style="color: #a020f0;">import</span> <span style="color: #008b8b;">gnu</span>.<span style="color: #008b8b;">io</span>.*;
+
+<span style="color: #a020f0;">public</span> <span style="color: #a020f0;">class</span> <span style="color: #228b22;">serial</span> <span style="color: #a020f0;">implements</span> <span style="color: #228b22;">SerialPortEventListener</span> {
+    <span style="color: #a020f0;">private</span> <span style="color: #228b22;">SerialPort</span> <span style="color: #a0522d;">port</span>;
+    <span style="color: #a020f0;">private</span> <span style="color: #a020f0;">static</span> <span style="color: #228b22;">BufferedReader</span> <span style="color: #a0522d;">reader</span>;
+
+    serial() {
+        <span style="color: #a020f0;">try</span> {
+            <span style="color: #b22222;">// </span><span style="color: #b22222;">Serial port initialize</span>
+            <span style="color: #228b22;">CommPortIdentifier</span> <span style="color: #a0522d;">portId</span> = CommPortIdentifier.getPortIdentifier(<span style="color: #8b2252;">"COM5"</span>);
+            port = (<span style="color: #228b22;">SerialPort</span>)portId.open(<span style="color: #8b2252;">"serial"</span>, 2000);
+
+            port.setSerialPortParams(
+                9600,                   <span style="color: #b22222;">// </span><span style="color: #b22222;">&#36890;&#20449;&#36895;&#24230;[bps]</span>
+                <span style="color: #008b8b;">SerialPort</span>.DATABITS_8,   <span style="color: #b22222;">// </span><span style="color: #b22222;">&#12487;&#12540;&#12479;&#12499;&#12483;&#12488;&#25968;</span>
+                <span style="color: #008b8b;">SerialPort</span>.STOPBITS_1,   <span style="color: #b22222;">// </span><span style="color: #b22222;">&#12473;&#12488;&#12483;&#12503;&#12499;&#12483;&#12488;</span>
+                <span style="color: #008b8b;">SerialPort</span>.PARITY_NONE   <span style="color: #b22222;">// </span><span style="color: #b22222;">&#12497;&#12522;&#12486;&#12451;</span>
+            );
+            port.setFlowControlMode(<span style="color: #008b8b;">SerialPort</span>.FLOWCONTROL_NONE);
+
+            reader = <span style="color: #a020f0;">new</span> <span style="color: #228b22;">BufferedReader</span>(
+                     <span style="color: #a020f0;">new</span> <span style="color: #228b22;">InputStreamReader</span>(port.getInputStream()));
+
+            <span style="color: #a020f0;">try</span> {
+                port.addEventListener(<span style="color: #a020f0;">this</span>);
+                port.notifyOnDataAvailable(<span style="color: #008b8b;">true</span>);
+            } <span style="color: #a020f0;">catch</span> (<span style="color: #228b22;">TooManyListenersException</span> <span style="color: #a0522d;">e</span>) {
+                System.out.println(<span style="color: #8b2252;">"Error: "</span> + e);
+            }
+
+        } <span style="color: #a020f0;">catch</span> (<span style="color: #228b22;">Exception</span> <span style="color: #a0522d;">e</span>) {
+            System.out.println(<span style="color: #8b2252;">"Error: "</span> + e);
+            System.exit(1);
+        }
+    }
+
+    <span style="color: #a020f0;">public</span> <span style="color: #228b22;">void</span> <span style="color: #0000ff;">run</span>() {
+        <span style="color: #a020f0;">try</span> {
+            <span style="color: #228b22;">InputStreamReader</span> <span style="color: #a0522d;">isr</span> = <span style="color: #a020f0;">new</span> <span style="color: #228b22;">InputStreamReader</span>(System.in);
+            <span style="color: #228b22;">BufferedReader</span> <span style="color: #a0522d;">br</span> = <span style="color: #a020f0;">new</span> <span style="color: #228b22;">BufferedReader</span>(isr);
+            <span style="color: #228b22;">OutputStream</span> <span style="color: #a0522d;">out</span> = port.getOutputStream();
+            <span style="color: #228b22;">boolean</span> <span style="color: #a0522d;">flagQuit</span> = <span style="color: #008b8b;">false</span>;
+            <span style="color: #a020f0;">while</span> (!flagQuit) {
+                <span style="color: #228b22;">String</span> <span style="color: #a0522d;">input</span> = br.readLine();
+                <span style="color: #a020f0;">if</span> (input.length() &gt; 0) {
+                    <span style="color: #a020f0;">if</span> (input.equals(<span style="color: #8b2252;">":quit"</span>))
+                        <span style="color: #a020f0;">break</span>;
+                    input += <span style="color: #8b2252;">"\r"</span>;
+                    out.write(input.getBytes(<span style="color: #8b2252;">"US-ASCII"</span>));
+                }
+
+            }
+
+            port.close();
+
+        } <span style="color: #a020f0;">catch</span> (<span style="color: #228b22;">Exception</span> <span style="color: #a0522d;">e</span>) {
+            System.out.println(<span style="color: #8b2252;">"Error: "</span> + e);
+        }
+    }
+
+    <span style="color: #a020f0;">public</span> <span style="color: #228b22;">void</span> <span style="color: #0000ff;">serialEvent</span>(<span style="color: #228b22;">SerialPortEvent</span> <span style="color: #a0522d;">event</span>) {
+        <span style="color: #a020f0;">if</span> (event.getEventType() == <span style="color: #008b8b;">SerialPortEvent</span>.DATA_AVAILABLE) {
+            <span style="color: #228b22;">String</span> <span style="color: #a0522d;">buffer</span> = <span style="color: #008b8b;">null</span>;
+            <span style="color: #a020f0;">try</span> {
+                <span style="color: #a020f0;">while</span> (reader.ready()) {
+                    buffer = reader.readLine();
+                    System.out.println(buffer);
+                }
+            } <span style="color: #a020f0;">catch</span> (<span style="color: #228b22;">IOException</span> <span style="color: #a0522d;">ex</span>){
+                ex.printStackTrace();
+                System.exit(1);
+            }
+        }
+    }
+
+    <span style="color: #a020f0;">public</span> <span style="color: #a020f0;">static</span> <span style="color: #228b22;">void</span> <span style="color: #0000ff;">main</span>(<span style="color: #228b22;">String</span> <span style="color: #a0522d;">arg</span>[]) {
+        <span style="color: #228b22;">serial</span> <span style="color: #a0522d;">serial</span> = <span style="color: #a020f0;">new</span> <span style="color: #228b22;">serial</span>();
+      <span style="color: #228b22;">  seri</span>al.run();
+    }
+}
+</pre>
+

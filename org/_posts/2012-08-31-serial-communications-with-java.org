@@ -1,0 +1,115 @@
+#+begin_html
+---
+layout: post
+title: "Javaからシリアル(RS232C)通信をする"
+description: ""
+category: 
+tags: []
+---
+{% include JB/setup %}
+#+end_html
+Javaではシリアルやパラレルポートを制御するためのAPIとして、Java Communication APIが定義されています。Windowsでは、このAPIの最新の実装が提供されていないため、オープンソース実装のRXTXを利用します。
+
+- [[http://rxtx.qbang.org/wiki/index.php/Main_Page][Rxtx]]
+
+通常はDownloadsからコンパイル済みのバイナリをダウンロードしますが。インストールするPCはWindows7 64bit版なので、64ビット版のバイナリを以下のサイトからダウンロードします。
+
+- [[http://www.cloudhopper.com/opensource/rxtx/][Cloudhopper : RXTX]]
+
+インストールは、 [[http://rxtx.qbang.org/wiki/index.php/Installation_for_Windows][Installation for Windows - Rxtx]] を参考に、展開したファイルをJREまたはJDKのフォルダにコピーします。
+
+: コピー win64\rxtxSerial.dll C:\Java\jdk1.7.0_06\bin
+: コピー RXTXcomm.jar C:\Java\jdk1.7.0_06\jre\lib\ext
+
+参考
+- [[http://www.javainthebox.net/JavaForFA/08-09CommAPI/No.08/commapi1.html][FA向けJavaプログラミング講座/8回/CommunicationAPI (1)]]
+- [[http://www.02.246.ne.jp/~torutk/javahow2/javaxcomm.html][Java Communications APIの使い方]]
+- [[http://d.hatena.ne.jp/shishimaruby/20110126/1296002224][windows 64bitでcomポートと通信する - メモス＼(^o^)／]]
+- [[http://www.maroon.dti.ne.jp/koten-kairo/works/dsPIC/jc3.html][RXTXライブラリの使い方 - Javaでシリアル通信（３）]]
+
+以下に通信をエコーするだけのサンプルを置いておきます。
+
+#+begin_src java
+import java.io.*;
+import java.util.*;
+import gnu.io.*;
+
+public class serial implements SerialPortEventListener {
+    private SerialPort port;
+    private static BufferedReader reader;
+
+    serial() {
+        try {
+            // Serial port initialize
+            CommPortIdentifier portId = CommPortIdentifier.getPortIdentifier("COM5");
+            port = (SerialPort)portId.open("serial", 2000);
+
+            port.setSerialPortParams(
+                9600,                   // 通信速度[bps]
+                SerialPort.DATABITS_8,   // データビット数
+                SerialPort.STOPBITS_1,   // ストップビット
+                SerialPort.PARITY_NONE   // パリティ
+            );
+            port.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
+
+            reader = new BufferedReader(
+                     new InputStreamReader(port.getInputStream()));
+
+            try {
+                port.addEventListener(this);
+                port.notifyOnDataAvailable(true);
+            } catch (TooManyListenersException e) {
+                System.out.println("Error: " + e);
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e);
+            System.exit(1);
+        }
+    }
+
+    public void run() {
+        try {
+            InputStreamReader isr = new InputStreamReader(System.in);
+            BufferedReader br = new BufferedReader(isr);
+            OutputStream out = port.getOutputStream();
+            boolean flagQuit = false;
+            while (!flagQuit) {
+                String input = br.readLine();
+                if (input.length() > 0) {
+                    if (input.equals(":quit"))
+                        break;
+                    input += "\r";
+                    out.write(input.getBytes("US-ASCII"));
+                }
+
+            }
+                
+            port.close();
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e);
+        }
+    }
+
+    public void serialEvent(SerialPortEvent event) {
+        if (event.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
+            String buffer = null;
+            try {
+                while (reader.ready()) {
+                    buffer = reader.readLine();
+                    System.out.println(buffer);
+                }
+            } catch (IOException ex){
+                ex.printStackTrace();
+                System.exit(1);
+            }
+        }
+    }
+
+    public static void main(String arg[]) {
+        serial serial = new serial();
+        serial.run();
+    }
+}
+#+end_src

@@ -1,6 +1,7 @@
 /* Override some defaults */
 html, body {
   background-color: #eee;
+  font-family: Verdana,Arial,"メイリオ",Meiryo,"ヒラギノ角ゴPro W3","Hiragino Kaku Gothic Pro","ＭＳ Ｐゴシック",sans-serif;
 }
 .navbar {
   margin-bottom: 0;
@@ -68,4 +69,23 @@ html, body {
 	border:1px solid #4C964D;
 	color:#FFF;
 }
+
+h1 {
+    margin: 0px 0px 20px 0px; /* t r b l */
+}
 	
+h2 {
+    margin: 0px 0px 10px 0px; /* t r b l */
+}
+	
+h3 {
+    margin: 0px 0px 10px 0px; /* t r b l */
+}
+	
+h4 {
+    margin: 0px 0px 10px 0px; /* t r b l */
+}
+	
+table {
+    margin: 0px 0px 20px 0px; /* t r b l */
+}

@@ -8,8 +8,10 @@ CONFIG = {
   'version' => "0.2.13",
   'themes' => File.join(SOURCE, "_includes", "themes"),
   'layouts' => File.join(SOURCE, "_layouts"),
-  'posts' => File.join(SOURCE, "_posts"),
-  'post_ext' => "md",
+#  'posts' => File.join(SOURCE, "_posts"),
+  'posts' => File.join(SOURCE, "org/_posts"),
+#  'post_ext' => "md",
+  'post_ext' => "org",
   'theme_package_version' => "0.1.0"
 }
 
@@ -59,6 +61,7 @@ task :post do
   
   puts "Creating new post: #{filename}"
   open(filename, 'w') do |post|
+    post.puts "#+begin_html"
     post.puts "---"
     post.puts "layout: post"
     post.puts "title: \"#{title.gsub(/-/,' ')}\""
@@ -67,6 +70,7 @@ task :post do
     post.puts "tags: []"
     post.puts "---"
     post.puts "{% include JB/setup %}"
+    post.puts "#+end_html"
   end
 end # task :post
 
@@ -86,12 +90,14 @@ task :page do
   mkdir_p File.dirname(filename)
   puts "Creating new page: #{filename}"
   open(filename, 'w') do |post|
+    post.puts "#+begin_html"
     post.puts "---"
     post.puts "layout: page"
     post.puts "title: \"#{title}\""
     post.puts 'description: ""'
     post.puts "---"
-    post.puts "{% include JB/setup %}"
+    post.puts "{% include JB/setup %}" 
+    post.puts "#+end_html"
   end
 end # task :page
 
