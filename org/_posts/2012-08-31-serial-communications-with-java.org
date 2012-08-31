@@ -3,8 +3,8 @@
 layout: post
 title: "Javaからシリアル(RS232C)通信をする"
 description: ""
-category: 
-tags: []
+category: programming
+tags: [java, serial, rs232c]
 ---
 {% include JB/setup %}
 #+end_html
