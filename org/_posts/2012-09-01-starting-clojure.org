@@ -1,0 +1,80 @@
+#+begin_html
+---
+layout: post
+title: "Clojureを使ってみる"
+description: ""
+category: programming
+tags: [clojure, emacs, nrepl]
+---
+{% include JB/setup %}
+#+end_html
+最近ちょこちょことClojureを使ってみています。動機は関数型言語を一度使ってみようと思い他にHaskell, Scalaなど有名どころがありますが、普段からEmacsを使っているのでついでにlispにも慣れることができるので、とりあえずClojureを使っています。
+
+Clojureを使うのに文法の色付けとREPLの環境は最低元欲しいので、Emacsの設定を以下にまとめました。環境はMac OS X Lionです。
+
+必要なものは、clojure-mode, nrepl.elとtools.nreplです、それぞれ以下のサイトで配布されています。あとPareditも一応入れておきます。
+
+- [[https://github.com/technomancy/clojure-mode][technomancy/clojure-mode]]
+- [[https://github.com/kingtim/nrepl.el][kingtim/nrepl.el]]
+- [[https://github.com/clojure/tools.nrepl][clojure/tools.nrepl]]
+
+インストール方法は、参考にした [[http://www.kedrovsky.com/blog/clojure-emacs-nrepl-and-leiningen][ここ]] の手順に従って進めます。
+
+* Clojureの環境を作成
+
+まず、Clojureの環境をセットアップします。Clojure, Leiningen2, プロジェクトの作成と進めます。
+
+Clojureのインストールは、Homebrewに最新版があるのでそれをインストールします。
+
+: $ brew install clojure
+
+Leiningen2はHomebrewにないので(あるのはLeningen1)、配布元から直接インストールします。leinコマンドはPATHの通った所にインストールします。
+
+#+begin_example
+$ cd ~/bin
+$ wget https://raw.github.com/technomancy/leiningen/preview/bin/lein
+$ chmod 755 lein
+#+end_example
+
+最後にClojureのプロジェクトを作成します。プロジェクトを保存する任意のフォルダに作成して下さい。
+
+#+begin_example
+$ cd ~/projects
+$ lein new testclj
+#+end_example
+
+* EmacsにClojureの環境を設定
+
+必要なEmacsのパッケージは、marmaladeリポジトリから全てインストール可能なようです。Emacs24を使っているのでpackage.elを使うことにします。init.elに以下の設定を追加して再起動するとパッケージのインストールは完了です。
+
+#+begin_src emacs-lisp
+(require 'package)
+(add-to-list 'package-archives
+         '("marmalade" . "http://marmalade-repo.org/packages/"))
+(package-initialize)
+(when (not package-archive-contents)
+  (package-refresh-contents))
+(defvar my-packages '(clojure-mode
+                      nrepl
+                      paredit))
+(dolist (p my-packages)
+  (when (not (package-installed-p p))
+    (package-install p)))
+#+end_src
+
+次にClojureとEmacsの通信を制御するtools.nreplをプロジェクトに設定します。~/projects/testclj/project.cljのdependenciesに追加します。
+
+#+begin_src clojure
+(defproject testclj "0.1.0-SNAPSHOT"
+  :description "FIXME: write description"
+  :url "http://example.com/FIXME"
+  :license {:name "Eclipse Public License"
+            :url "http://www.eclipse.org/legal/epl-v10.html"}
+  :dependencies [[org.clojure/clojure "1.4.0"]
+                 [org.clojure/tools.nrepl "0.2.0-beta9"]])
+#+end_src
+
+以上で設定が完了です。プロジェクトのファイルを開いて、M-x nrepl-jack-inを実行するとREPLバッファが開きます。このバッファからClojureのコマンドを実行できたりEmacsから制御できるようになります。
+
+* 参考
+- [[http://www.kedrovsky.com/blog/clojure-emacs-nrepl-and-leiningen][Clojure, Emacs, nREPL and Leiningen | Karl Kedrovsky]]
